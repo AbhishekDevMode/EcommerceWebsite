@@ -3,14 +3,16 @@
 FROM eclipse-temurin:26-jdk-jammy AS build
 WORKDIR /app
 
-# Install Maven manually in the container
-RUN apt-get update && apt-get install -y maven
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
 
-COPY pom.xml .
+RUN chmod +x mvnw
+
+# Copy the rest of the source code
 COPY src ./src
 
 # Build the application
-RUN mvn clean package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 # --- Step 2: Run the Application ---
 FROM eclipse-temurin:26-jre-jammy
