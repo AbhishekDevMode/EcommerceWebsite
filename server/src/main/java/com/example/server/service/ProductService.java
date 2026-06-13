@@ -1,21 +1,24 @@
 package com.example.server.service;
-
-import com.example.server.model.Category;
-import com.example.server.repsoitory.CategoryRepository;
+import com.example.server.model.Product;
+import com.example.server.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
 @Service
-public class CategoryService {
+public class ProductService {
+    private final ProductRepository productRepository;
 
-    private CategoryRepository categoryRepository;
-
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
     }
+    public List<Product> getProductByCategory(Long categoryId){
+        return productRepository.findByCategoryId(categoryId);
+    }
+
 }

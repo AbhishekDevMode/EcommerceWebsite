@@ -1,7 +1,7 @@
 package com.example.server.service;
 
 import com.example.server.model.Category;
-import com.example.server.repsoitory.CategoryRepository;
+import com.example.server.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

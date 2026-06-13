@@ -1,4 +1,4 @@
-package com.example.server.repsoitory;
+package com.example.server.repository;
 
 import com.example.server.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;

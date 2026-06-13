@@ -1,4 +1,8 @@
 package com.example.server.config;
+import com.example.server.model.Category;
+import com.example.server.model.Product;
+import com.example.server.repository.CategoryRepository;
+import com.example.server.repository.ProductRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.util.Arrays;

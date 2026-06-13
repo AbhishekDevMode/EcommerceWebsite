@@ -1,6 +1,10 @@
 package com.example.server.controllers;
 
+import com.example.server.model.Product;
+import com.example.server.service.ProductService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
