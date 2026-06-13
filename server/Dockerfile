@@ -1,19 +1,21 @@
 # --- Step 1: Build the Maven Application ---
-FROM maven:3.9.6-eclipse-temurin-26 AS build
+
+FROM eclipse-temurin:26-jdk-jammy AS build
 WORKDIR /app
 
-# Copy the pom.xml and source code
+# Install Maven manually in the container
+RUN apt-get update && apt-get install -y maven
+
 COPY pom.xml .
 COPY src ./src
 
-# Build the application and skip tests for faster deployment
+# Build the application
 RUN mvn clean package -DskipTests
 
 # --- Step 2: Run the Application ---
 FROM eclipse-temurin:26-jre-jammy
 WORKDIR /app
 
-# Copy the compiled JAR from the build step
 COPY --from=build /app/target/*.jar app.jar
 
 # Expose the default port Render uses
