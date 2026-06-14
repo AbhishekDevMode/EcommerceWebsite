@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = {"http://localhost:5173", "https://client.vercel.app"})
+@CrossOrigin(origins = {"http://localhost:5173", "https://ecommerce-website-blush-five.vercel.app"})
 public class ProductController {
     private final ProductService productService;
 
