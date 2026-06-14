@@ -1,4 +1,3 @@
-# --- Step 1: Build the Maven Application ---
 
 FROM eclipse-temurin:26-jdk-jammy AS build
 WORKDIR /app
