@@ -11,7 +11,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin(origins = {"http://localhost:5173", "https://ecommerce-website-blush-five.vercel.app"})
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "https://ecommerce-website-blush-five.vercel.app",
+        "https://ecommerce-website-lf5svgjv0-itsabhishek5678-3320s-projects.vercel.app"
+})
 public class CategoryController {
     private CategoryService categoryService;
 
