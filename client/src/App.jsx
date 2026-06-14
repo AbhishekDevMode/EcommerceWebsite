@@ -11,7 +11,7 @@ function App() {
   const [sortOrder, setSortOrder] = useState("asc");
 const API_BASE_URL=import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/pfoducts`)
+    fetch(`${API_BASE_URL}/api/products`)
       .then((response) => response.json())
       .then((data) => setProducts(data));
 
