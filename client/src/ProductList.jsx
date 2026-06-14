@@ -1,8 +1,7 @@
 import React from "react";
 
 const ProductList = ({ products }) => {
-  const backend_url="http://localhost:8080";
-
+  const backend_url = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
   return (
     <div className="row">
       {products.map((product) => (
@@ -12,7 +11,7 @@ const ProductList = ({ products }) => {
               src={`${backend_url}${product.imageUrl}`}
               className="card-img-top"
               alt={product.name}
-              style={{height:"300px",objecFit:"cover"}}
+              style={{height:"300px",objectFit:"cover"}}
               onError={(e)=>{
                 console.log(`Failed to load image:${product.imageUrl}`);
                 e.target.src="https://via.placeholder.com/600X400?text=Image+NOt+Found";

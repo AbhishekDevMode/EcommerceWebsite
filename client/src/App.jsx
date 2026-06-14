@@ -9,18 +9,18 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-
+const API_BASE_URL=import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
   useEffect(() => {
-    fetch("http://localhost:8080/api/products")
+    fetch(`${API_BASE_URL}/api/pfoducts`)
       .then((response) => response.json())
       .then((data) => setProducts(data));
 
-    fetch("http://localhost:8080/api/categories")
+    fetch(`${API_BASE_URL}/api/categories`)
       .then((response) => response.json())
       .then((data) => setCategories(data));
-  }, []);
+  }, [API_BASE_URL]);
 
-  const handleSearchChange = (categoryId) => {
+  const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
   
