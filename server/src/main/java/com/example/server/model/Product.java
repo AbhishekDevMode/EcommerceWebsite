@@ -27,6 +27,15 @@ public class Product {
     @EqualsAndHashCode.Exclude
     private Category category;
 
+    private String brand;
+    private Integer stock = 0;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("product")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private java.util.List<Review> reviews = new java.util.ArrayList<>();
+
     public Long getId() {
         return id;
     }

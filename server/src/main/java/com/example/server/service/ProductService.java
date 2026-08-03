@@ -21,4 +21,14 @@ public class ProductService {
         return productRepository.findByCategoryId(categoryId);
     }
 
+    public Product getProductById(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
+    public List<Product> getRelatedProducts(Long categoryId, Long productId) {
+        List<Product> products = productRepository.findByCategoryId(categoryId);
+        products.removeIf(p -> p.getId().equals(productId));
+        return products.size() > 4 ? products.subList(0, 4) : products;
+    }
+
 }
