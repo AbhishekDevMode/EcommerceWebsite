@@ -47,9 +47,9 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductByCategory(categoryId));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
+    @GetMapping("/{slug}")
+    public ResponseEntity<Product> getProductBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(productService.getProductBySlug(slug));
     }
 
     @GetMapping("/{id}/related")
@@ -67,6 +67,7 @@ public class ProductController {
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
         Product product = productService.getProductById(id);
         product.setName(productDetails.getName());
+        product.setSlug(productDetails.getSlug());
         product.setDescription(productDetails.getDescription());
         product.setPrice(productDetails.getPrice());
         product.setBrand(productDetails.getBrand());

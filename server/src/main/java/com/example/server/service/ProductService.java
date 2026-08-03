@@ -19,7 +19,7 @@ public class ProductService {
     }
 
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productRepository.findByIsActiveTrue();
     }
 
     public Page<Product> getFilteredProducts(
@@ -47,6 +47,9 @@ public class ProductService {
 
         Specification<Product> spec = (root, queryObj, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            // Always filter active products by default
+            predicates.add(cb.equal(root.get("isActive"), true));
 
             if (categoryId != null) {
                 predicates.add(cb.equal(root.get("category").get("id"), categoryId));
@@ -91,6 +94,21 @@ public class ProductService {
 
     public Product getProductById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+    }
+
+    public Product getProductBySlug(String slugOrId) {
+        if (slugOrId == null || slugOrId.trim().isEmpty()) {
+            throw new RuntimeException("Slug or ID cannot be empty");
+        }
+        return productRepository.findBySlug(slugOrId)
+                .orElseGet(() -> {
+                    try {
+                        Long id = Long.parseLong(slugOrId);
+                        return getProductById(id);
+                    } catch (NumberFormatException e) {
+                        throw new RuntimeException("Product not found with slug: " + slugOrId);
+                    }
+                });
     }
 
     public List<Product> getRelatedProducts(Long categoryId, Long productId) {

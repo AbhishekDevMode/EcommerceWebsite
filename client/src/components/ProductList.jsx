@@ -4,6 +4,31 @@ import { CartContext } from '../context/CartContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
+const ProductSkeleton = () => (
+    <div className="col-xl-4 col-md-6">
+        <div className="card card-product h-100 border-0 shadow-sm opacity-75">
+            <div className="placeholder-glow">
+                <div className="placeholder col-12 rounded-top" style={{ height: '220px' }}></div>
+            </div>
+            <div className="card-body d-flex flex-column gap-2">
+                <div className="placeholder-glow">
+                    <span className="placeholder col-4"></span>
+                </div>
+                <div className="placeholder-glow">
+                    <span className="placeholder col-8 fs-5"></span>
+                </div>
+                <div className="placeholder-glow">
+                    <span className="placeholder col-6"></span>
+                </div>
+                <div className="mt-auto d-flex justify-content-between align-items-center pt-3 placeholder-glow">
+                    <span className="placeholder col-4 fs-4"></span>
+                    <span className="placeholder col-3 btn btn-sm btn-primary disabled"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 const ProductList = ({
     selectedCategory,
     onSelectCategory,
@@ -15,6 +40,7 @@ const ProductList = ({
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
     // Filters state
@@ -28,6 +54,7 @@ const ProductList = ({
 
     const fetchFilteredProducts = async () => {
         setLoading(true);
+        setError(null);
         try {
             const params = new URLSearchParams();
             if (selectedCategory) params.append('categoryId', selectedCategory);
@@ -36,20 +63,28 @@ const ProductList = ({
             if (minRating) params.append('minRating', minRating);
             params.append('sortBy', sortBy);
             params.append('page', page);
-            params.append('size', 8);
+            params.append('size', 9);
 
             const res = await axios.get(`${API_BASE_URL}/api/products/filter?${params.toString()}`);
             if (res.data && res.data.content) {
                 setProducts(res.data.content);
                 setTotalPages(res.data.totalPages || 1);
                 setTotalElements(res.data.totalElements || 0);
-            } else {
-                setProducts(res.data || []);
+            } else if (Array.isArray(res.data)) {
+                setProducts(res.data);
                 setTotalPages(1);
-                setTotalElements((res.data || []).length);
+                setTotalElements(res.data.length);
+            } else {
+                // Fallback direct endpoint GET /api/products
+                const fallbackRes = await axios.get(`${API_BASE_URL}/api/products`);
+                const items = Array.isArray(fallbackRes.data) ? fallbackRes.data : [];
+                setProducts(items);
+                setTotalPages(1);
+                setTotalElements(items.length);
             }
         } catch (err) {
-            console.error('Error fetching filtered products:', err);
+            console.error('Error fetching products:', err);
+            setError('Failed to connect to backend product database. Please ensure Spring Boot server is running.');
             setProducts([]);
         } finally {
             setLoading(false);
@@ -67,9 +102,30 @@ const ProductList = ({
     const handleQuickAddToCart = async (e, product) => {
         e.stopPropagation();
         const res = await addToCart(product.id, 1);
-        if (res?.requireAuth) {
+        if (res?.requireAuth && onOpenAuth) {
             onOpenAuth('login');
         }
+    };
+
+    const getPrimaryImage = (product) => {
+        if (product.productImages && product.productImages.length > 0) {
+            const primary = product.productImages.find(img => img.isPrimary);
+            if (primary && primary.imageUrl) return primary.imageUrl;
+            if (product.productImages[0].imageUrl) return product.productImages[0].imageUrl;
+        }
+        if (product.imageUrl) return product.imageUrl;
+        if (product.images && product.images.length > 0) return product.images[0];
+        return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80";
+    };
+
+    const formatPrice = (product) => {
+        if (product.basePriceCents !== undefined && product.basePriceCents !== null) {
+            return (product.basePriceCents / 100).toFixed(2);
+        }
+        if (product.price !== undefined && product.price !== null) {
+            return Number(product.price).toFixed(2);
+        }
+        return "0.00";
     };
 
     const renderStars = (rating) => {
@@ -97,7 +153,7 @@ const ProductList = ({
                             <h5 className="fw-bold mb-0 text-gradient"><i className="bi bi-funnel me-2"></i>Filters</h5>
                             {(selectedCategory || minPrice || maxPrice || minRating) && (
                                 <button className="btn btn-sm btn-link text-danger text-decoration-none p-0" onClick={() => {
-                                    onSelectCategory(null);
+                                    if (onSelectCategory) onSelectCategory(null);
                                     setMinPrice('');
                                     setMaxPrice('');
                                     setMinRating('');
@@ -113,7 +169,7 @@ const ProductList = ({
                             <div className="list-group list-group-flush">
                                 <button
                                     className={`list-group-item list-group-item-action bg-transparent border-0 text-light py-2 ${!selectedCategory ? 'fw-bold text-primary active-category' : ''}`}
-                                    onClick={() => onSelectCategory(null)}
+                                    onClick={() => onSelectCategory && onSelectCategory(null)}
                                 >
                                     All Categories
                                 </button>
@@ -121,7 +177,7 @@ const ProductList = ({
                                     <button
                                         key={cat.id}
                                         className={`list-group-item list-group-item-action bg-transparent border-0 text-light py-2 ${selectedCategory === cat.id ? 'fw-bold text-primary active-category' : ''}`}
-                                        onClick={() => onSelectCategory(cat.id)}
+                                        onClick={() => onSelectCategory && onSelectCategory(cat.id)}
                                     >
                                         {cat.name}
                                     </button>
@@ -182,7 +238,7 @@ const ProductList = ({
                     {/* Top Control Bar */}
                     <div className="card card-dark p-3 mb-4 d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
                         <div className="text-muted">
-                            Showing <span className="fw-bold text-light">{products.length}</span> of <span className="fw-bold text-light">{totalElements}</span> items
+                            Showing <span className="fw-bold text-light">{products.length}</span> of <span className="fw-bold text-light">{totalElements || products.length}</span> items
                         </div>
 
                         <div className="d-flex align-items-center gap-3">
@@ -221,13 +277,23 @@ const ProductList = ({
                         </div>
                     </div>
 
-                    {/* Products Grid / List */}
+                    {/* Error Banner */}
+                    {error && (
+                        <div className="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+                            <i className="bi bi-exclamation-triangle-fill fs-4"></i>
+                            <div>{error}</div>
+                        </div>
+                    )}
+
+                    {/* Products Grid / List / Skeleton */}
                     {loading ? (
-                        <div className="text-center py-5">
-                            <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
-                                <span className="visually-hidden">Loading products...</span>
-                            </div>
-                            <p className="text-muted mt-3">Loading product catalog...</p>
+                        <div className="row g-4">
+                            <ProductSkeleton />
+                            <ProductSkeleton />
+                            <ProductSkeleton />
+                            <ProductSkeleton />
+                            <ProductSkeleton />
+                            <ProductSkeleton />
                         </div>
                     ) : products.length === 0 ? (
                         <div className="text-center py-5 card card-dark p-4">
@@ -235,7 +301,7 @@ const ProductList = ({
                             <h4 className="fw-bold text-light">No Products Found</h4>
                             <p className="text-muted">Try adjusting your filters or search terms.</p>
                             <button className="btn btn-outline-primary btn-sm mx-auto" onClick={() => {
-                                onSelectCategory(null);
+                                if (onSelectCategory) onSelectCategory(null);
                                 setMinPrice('');
                                 setMaxPrice('');
                                 setMinRating('');
@@ -245,17 +311,19 @@ const ProductList = ({
                         <div className="row g-4">
                             {products.map(product => (
                                 <div key={product.id} className="col-xl-4 col-md-6">
-                                    <div className="card card-product h-100 cursor-pointer border-0 shadow-sm" onClick={() => onProductClick(product)}>
+                                    <div className="card card-product h-100 cursor-pointer border-0 shadow-sm" onClick={() => onProductClick && onProductClick(product)}>
                                         <div className="position-relative overflow-hidden product-img-wrapper">
                                             <img
-                                                src={product.imageUrl}
+                                                src={getPrimaryImage(product)}
                                                 className="card-img-top product-img"
-                                                alt={product.name}
+                                                alt={product.title || product.name}
                                                 style={{ height: '220px', objectFit: 'cover' }}
                                             />
-                                            <span className="badge bg-secondary position-absolute top-0 start-0 m-2 px-2 py-1">
-                                                {product.category?.name}
-                                            </span>
+                                            {product.category?.name && (
+                                                <span className="badge bg-secondary position-absolute top-0 start-0 m-2 px-2 py-1">
+                                                    {product.category.name}
+                                                </span>
+                                            )}
                                             {product.stock <= 5 && product.stock > 0 && (
                                                 <span className="badge bg-warning text-dark position-absolute top-0 end-0 m-2">
                                                     Only {product.stock} left
@@ -265,7 +333,7 @@ const ProductList = ({
 
                                         <div className="card-body d-flex flex-column">
                                             <div className="small text-muted mb-1">{product.brand || 'Premium Collection'}</div>
-                                            <h6 className="card-title text-light fw-bold text-truncate mb-2">{product.name}</h6>
+                                            <h6 className="card-title text-light fw-bold text-truncate mb-2">{product.title || product.name}</h6>
                                             
                                             <div className="d-flex align-items-center gap-2 mb-3">
                                                 <div className="d-flex align-items-center gap-1 small">
@@ -275,7 +343,7 @@ const ProductList = ({
                                             </div>
 
                                             <div className="mt-auto d-flex justify-content-between align-items-center">
-                                                <span className="fs-5 fw-bold text-success">${product.price?.toFixed(2)}</span>
+                                                <span className="fs-5 fw-bold text-success">${formatPrice(product)}</span>
                                                 <button
                                                     className="btn btn-outline-primary btn-sm rounded-circle p-2"
                                                     title="Quick Add to Cart"
@@ -293,19 +361,21 @@ const ProductList = ({
                         /* List View Layout */
                         <div className="d-flex flex-column gap-3">
                             {products.map(product => (
-                                <div key={product.id} className="card card-product p-3 cursor-pointer" onClick={() => onProductClick(product)}>
+                                <div key={product.id} className="card card-product p-3 cursor-pointer" onClick={() => onProductClick && onProductClick(product)}>
                                     <div className="row g-3 align-items-center">
                                         <div className="col-md-3 col-4">
                                             <img
-                                                src={product.imageUrl}
+                                                src={getPrimaryImage(product)}
                                                 className="img-fluid rounded object-fit-cover"
-                                                alt={product.name}
+                                                alt={product.title || product.name}
                                                 style={{ height: '140px', width: '100%' }}
                                             />
                                         </div>
                                         <div className="col-md-6 col-8">
-                                            <span className="badge bg-secondary mb-1">{product.category?.name}</span>
-                                            <h5 className="fw-bold text-light mb-1">{product.name}</h5>
+                                            {product.category?.name && (
+                                                <span className="badge bg-secondary mb-1">{product.category.name}</span>
+                                            )}
+                                            <h5 className="fw-bold text-light mb-1">{product.title || product.name}</h5>
                                             <div className="small text-muted mb-2">{product.brand}</div>
                                             <p className="small text-muted text-truncate mb-2" style={{ maxWidth: '400px' }}>{product.description}</p>
                                             <div className="d-flex align-items-center gap-1 small">
@@ -314,7 +384,7 @@ const ProductList = ({
                                             </div>
                                         </div>
                                         <div className="col-md-3 col-12 d-flex flex-column justify-content-center align-items-md-end">
-                                            <div className="fs-4 fw-bold text-success mb-2">${product.price?.toFixed(2)}</div>
+                                            <div className="fs-4 fw-bold text-success mb-2">${formatPrice(product)}</div>
                                             <button
                                                 className="btn btn-primary btn-sm w-100 rounded-pill"
                                                 onClick={(e) => handleQuickAddToCart(e, product)}
