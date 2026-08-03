@@ -25,12 +25,36 @@ public class CartController {
     @PostMapping("/add")
     public ResponseEntity<Cart> addToCart(@RequestBody AddToCartRequest request, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        return ResponseEntity.ok(cartService.addToCart(userDetails.getId(), request.getProductId(), request.getQuantity()));
+        return ResponseEntity.ok(cartService.addToCart(
+                userDetails.getId(),
+                request.getProductId(),
+                request.getQuantity(),
+                request.getSelectedSize(),
+                request.getSelectedColor()
+        ));
     }
 
     @PutMapping("/update/{itemId}")
     public ResponseEntity<Cart> updateQuantity(@PathVariable Long itemId, @RequestBody AddToCartRequest request, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         return ResponseEntity.ok(cartService.updateQuantity(userDetails.getId(), itemId, request.getQuantity()));
+    }
+
+    @PutMapping("/save-for-later/{itemId}")
+    public ResponseEntity<Cart> saveForLater(@PathVariable Long itemId, Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return ResponseEntity.ok(cartService.toggleSaveForLater(userDetails.getId(), itemId, true));
+    }
+
+    @PutMapping("/move-to-cart/{itemId}")
+    public ResponseEntity<Cart> moveToCart(@PathVariable Long itemId, Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return ResponseEntity.ok(cartService.toggleSaveForLater(userDetails.getId(), itemId, false));
+    }
+
+    @DeleteMapping("/remove/{itemId}")
+    public ResponseEntity<Cart> removeFromCart(@PathVariable Long itemId, Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return ResponseEntity.ok(cartService.removeFromCart(userDetails.getId(), itemId));
     }
 }

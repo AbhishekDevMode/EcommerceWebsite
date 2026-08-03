@@ -21,12 +21,17 @@ public class OrderController {
     @PostMapping("/checkout")
     public ResponseEntity<Order> placeOrder(@RequestBody CheckoutRequest request, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        return ResponseEntity.ok(orderService.placeOrder(userDetails.getId(), request.getShippingAddress()));
+        return ResponseEntity.ok(orderService.placeOrder(userDetails.getId(), request));
     }
 
     @GetMapping("/history")
     public ResponseEntity<List<Order>> getOrderHistory(Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         return ResponseEntity.ok(orderService.getOrderHistory(userDetails.getId()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id));
     }
 }

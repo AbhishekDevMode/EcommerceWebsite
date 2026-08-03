@@ -3,31 +3,26 @@ package com.example.server.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class Review {
+@Table(name = "user_addresses")
+public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    @JsonIgnoreProperties("reviews")
-    private Product product;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"addresses", "password"})
     private User user;
 
-    private Integer rating; // 1 to 5
-    
-    private String title;
-
-    @Column(columnDefinition = "TEXT")
-    private String comment;
-
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private String fullName;
+    private String phone;
+    private String street;
+    private String city;
+    private String state;
+    private String zipCode;
+    private String country;
+    private boolean isDefault = false;
 }

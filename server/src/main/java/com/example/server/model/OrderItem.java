@@ -1,5 +1,6 @@
 package com.example.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @JsonIgnoreProperties("items")
     private Order order;
 
     @ManyToOne
@@ -19,6 +21,7 @@ public class OrderItem {
     private Product product;
 
     private Integer quantity;
-    
-    private Double price; // Price at the time of order
+    private Double price;
+    private String selectedSize;
+    private String selectedColor;
 }

@@ -6,17 +6,29 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 public class Product {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name="imageurl")
+    @Column(name = "imageurl")
     private String imageUrl;
+
+    @ElementCollection
+    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url")
+    private List<String> images = new ArrayList<>();
 
     private Double price;
 
@@ -28,32 +40,40 @@ public class Product {
     private Category category;
 
     private String brand;
-    private Integer stock = 0;
+    private Integer stock = 10;
+
+    private Double averageRating = 0.0;
+    private Integer numReviews = 0;
+
+    @ElementCollection
+    @CollectionTable(name = "product_sizes", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "size")
+    private List<String> sizes = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "product_colors", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "color")
+    private List<String> colors = new ArrayList<>();
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("product")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private java.util.List<Review> reviews = new java.util.ArrayList<>();
+    private List<Review> reviews = new ArrayList<>();
 
-    public Long getId() {
-        return id;
+    public void updateRating() {
+        if (reviews == null || reviews.isEmpty()) {
+            this.averageRating = 0.0;
+            this.numReviews = 0;
+        } else {
+            double sum = 0.0;
+            for (Review r : reviews) {
+                sum += (r.getRating() != null ? r.getRating() : 0);
+            }
+            this.averageRating = Math.round((sum / reviews.size()) * 10.0) / 10.0;
+            this.numReviews = reviews.size();
+        }
     }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {  this.name = name; }
-    public String getDescription() {return description;}
-    public void setDescription(String description) { this.description = description; }
-    public String getImageUrl() {return imageUrl;}
-    public void setImageUrl(String imageUrl) {this.imageUrl = imageUrl;}
-    public Double getPrice() {return price;}
-    public void setPrice(Double price) {this.price = price;}
-    public Category getCategory() {return category;}
-    public void setCategory(Category category) {this.category = category;}
-
-
 }

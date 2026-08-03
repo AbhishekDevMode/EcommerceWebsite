@@ -4,25 +4,61 @@ import { jwtDecode } from 'jwt-decode';
 
 export const AuthContext = createContext();
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setAddresses([]);
+        delete axios.defaults.headers.common['Authorization'];
+    };
+
+    const fetchProfile = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+        try {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            const res = await axios.get(`${API_BASE_URL}/api/auth/profile`);
+            setUser(res.data);
+            if (res.data.addresses) {
+                setAddresses(res.data.addresses);
+            }
+        } catch (err) {
+            console.error('Error fetching profile:', err);
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                try { setUser(JSON.parse(savedUser)); } catch (e) {}
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
                 const decoded = jwtDecode(token);
-                // Check if expired
                 if (decoded.exp * 1000 < Date.now()) {
                     logout();
                 } else {
-                    const userData = JSON.parse(localStorage.getItem('user'));
-                    setUser(userData);
                     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    fetchProfile();
                 }
             } catch (error) {
                 logout();
             }
+        } else {
+            setLoading(false);
         }
     }, []);
 
@@ -31,17 +67,109 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        fetchProfile();
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        delete axios.defaults.headers.common['Authorization'];
+    const socialLogin = async (provider) => {
+        // Simulated social login for Google / Facebook
+        try {
+            const fakeEmail = `${provider.toLowerCase()}_user@example.com`;
+            const fakeName = `${provider} User`;
+            // Try login or signup
+            try {
+                const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
+                    email: fakeEmail,
+                    password: "socialpassword123"
+                });
+                login(res.data.accessToken, res.data);
+            } catch (e) {
+                // If user doesn't exist, sign up first
+                await axios.post(`${API_BASE_URL}/api/auth/signup`, {
+                    name: fakeName,
+                    email: fakeEmail,
+                    password: "socialpassword123"
+                });
+                const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
+                    email: fakeEmail,
+                    password: "socialpassword123"
+                });
+                login(res.data.accessToken, res.data);
+            }
+        } catch (err) {
+            console.error('Social login error:', err);
+            throw err;
+        }
+    };
+
+    const updateProfile = async (updatedData) => {
+        try {
+            const res = await axios.put(`${API_BASE_URL}/api/auth/profile`, updatedData);
+            setUser(res.data);
+            localStorage.setItem('user', JSON.stringify(res.data));
+            return res.data;
+        } catch (err) {
+            console.error('Update profile error:', err);
+            throw err;
+        }
+    };
+
+    const fetchAddresses = async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/auth/addresses`);
+            setAddresses(res.data);
+            return res.data;
+        } catch (err) {
+            console.error('Fetch addresses error:', err);
+            return [];
+        }
+    };
+
+    const addAddress = async (addressData) => {
+        try {
+            const res = await axios.post(`${API_BASE_URL}/api/auth/addresses`, addressData);
+            setAddresses(prev => [...prev, res.data]);
+            return res.data;
+        } catch (err) {
+            console.error('Add address error:', err);
+            throw err;
+        }
+    };
+
+    const deleteAddress = async (id) => {
+        try {
+            await axios.delete(`${API_BASE_URL}/api/auth/addresses/${id}`);
+            setAddresses(prev => prev.filter(a => a.id !== id));
+        } catch (err) {
+            console.error('Delete address error:', err);
+            throw err;
+        }
+    };
+
+    const forgotPassword = async (email) => {
+        const res = await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, { email });
+        return res.data;
+    };
+
+    const resetPassword = async (token, newPassword) => {
+        const res = await axios.post(`${API_BASE_URL}/api/auth/reset-password`, { token, newPassword });
+        return res.data;
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{
+            user,
+            addresses,
+            loading,
+            login,
+            logout,
+            socialLogin,
+            updateProfile,
+            fetchAddresses,
+            addAddress,
+            deleteAddress,
+            forgotPassword,
+            resetPassword
+        }}>
             {children}
         </AuthContext.Provider>
     );

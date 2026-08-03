@@ -18,18 +18,25 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"addresses", "password"})
     private User user;
 
-    private String status; // e.g. PLACED, SHIPPED, DELIVERED
+    private String status = "PLACED";
     
-    private Double totalAmount;
+    private Double subtotal = 0.0;
+    private Double tax = 0.0;
+    private Double shippingFee = 0.0;
+    private Double totalAmount = 0.0;
+
+    private String paymentMethod; // Stripe, PayPal, Razorpay
+    private String paymentStatus = "PAID";
 
     @Column(columnDefinition = "TEXT")
     private String shippingAddress;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("order")
     private List<OrderItem> items = new ArrayList<>();
 }
