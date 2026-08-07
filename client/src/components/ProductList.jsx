@@ -13,7 +13,7 @@ const ProductSkeleton = () => (
             <div className="card-body d-flex flex-column gap-2">
                 <div className="placeholder-glow">
                     <span className="placeholder col-4"></span>
-                </div>
+                </div> 
                 <div className="placeholder-glow">
                     <span className="placeholder col-8 fs-5"></span>
                 </div>
@@ -41,7 +41,7 @@ const ProductList = ({
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState('grid'); 
 
     // Filters state
     const [minPrice, setMinPrice] = useState('');

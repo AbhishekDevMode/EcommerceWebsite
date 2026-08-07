@@ -6,6 +6,7 @@ import com.example.server.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -69,19 +70,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults()) // allow all for dev via corsConfigurationSource
+                .cors(Customizer.withDefaults())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                                .requestMatchers("/api/payments/**").permitAll()
+                                .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/ws/**").permitAll()
-                                .requestMatchers("/api/**").authenticated()
-                                .anyRequest().permitAll()
+                                .requestMatchers("/api/cart/**").authenticated()
+                                .requestMatchers("/api/orders/**").authenticated()
+                                .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(authenticationProvider());
-
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
