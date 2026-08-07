@@ -21,7 +21,8 @@ export const AuthProvider = ({ children }) => {
 
     const fetchProfile = async () => {
         const token = localStorage.getItem('token');
-        if (!token) {
+        if (!token || token === 'undefined') {
+            logout();
             setLoading(false);
             return;
         }
@@ -34,9 +35,13 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (err) {
             console.error('Error fetching profile:', err);
-            const savedUser = localStorage.getItem('user');
-            if (savedUser) {
-                try { setUser(JSON.parse(savedUser)); } catch (e) {}
+            if (err.response?.status === 401) {
+                logout();
+            } else {
+                const savedUser = localStorage.getItem('user');
+                if (savedUser) {
+                    try { setUser(JSON.parse(savedUser)); } catch (e) {}
+                }
             }
         } finally {
             setLoading(false);
@@ -44,8 +49,23 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        // Global axios 401 handler
+        const interceptor = axios.interceptors.response.use(
+            response => response,
+            error => {
+                if (error.response && error.response.status === 401) {
+                    const token = localStorage.getItem('token');
+                    // Only logout if token was present but rejected
+                    if (token) {
+                        logout();
+                    }
+                }
+                return Promise.reject(error);
+            }
+        );
+
         const token = localStorage.getItem('token');
-        if (token) {
+        if (token && token !== 'undefined') {
             try {
                 const decoded = jwtDecode(token);
                 if (decoded.exp * 1000 < Date.now()) {
@@ -58,32 +78,41 @@ export const AuthProvider = ({ children }) => {
                 logout();
             }
         } else {
+            logout();
             setLoading(false);
         }
+
+        return () => axios.interceptors.response.eject(interceptor);
     }, []);
 
-    const login = (token, userData) => {
-        localStorage.setItem('token', token);
+    const login = (tokenArg, userData) => {
+        let validToken = tokenArg;
+        if (!validToken || validToken === 'undefined') {
+            validToken = userData?.token || userData?.accessToken;
+        }
+        if (!validToken || validToken === 'undefined') {
+            console.error("Invalid token received during login");
+            return;
+        }
+        localStorage.setItem('token', validToken);
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${validToken}`;
         fetchProfile();
     };
 
     const socialLogin = async (provider) => {
-        // Simulated social login for Google / Facebook
         try {
             const fakeEmail = `${provider.toLowerCase()}_user@example.com`;
             const fakeName = `${provider} User`;
-            // Try login or signup
             try {
                 const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
                     email: fakeEmail,
                     password: "socialpassword123"
                 });
-                login(res.data.accessToken, res.data);
+                const token = res.data.token || res.data.accessToken;
+                login(token, res.data);
             } catch (e) {
-                // If user doesn't exist, sign up first
                 await axios.post(`${API_BASE_URL}/api/auth/signup`, {
                     name: fakeName,
                     email: fakeEmail,
@@ -93,7 +122,8 @@ export const AuthProvider = ({ children }) => {
                     email: fakeEmail,
                     password: "socialpassword123"
                 });
-                login(res.data.accessToken, res.data);
+                const token = res.data.token || res.data.accessToken;
+                login(token, res.data);
             }
         } catch (err) {
             console.error('Social login error:', err);

@@ -26,7 +26,8 @@ const AuthModal = ({ initialMode = 'login', onClose }) => {
         setLoading(true);
         try {
             const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { email, password });
-            login(res.data.accessToken, res.data);
+            const token = res.data.token || res.data.accessToken;
+            login(token, res.data);
             onClose();
         } catch (err) {
             setErrorMsg(err.response?.data || 'Invalid email or password credentials');
@@ -43,7 +44,8 @@ const AuthModal = ({ initialMode = 'login', onClose }) => {
             await axios.post(`${API_BASE_URL}/api/auth/signup`, { name, email, password });
             // Auto login after signup
             const loginRes = await axios.post(`${API_BASE_URL}/api/auth/login`, { email, password });
-            login(loginRes.data.accessToken, loginRes.data);
+            const token = loginRes.data.token || loginRes.data.accessToken;
+            login(token, loginRes.data);
             onClose();
         } catch (err) {
             setErrorMsg(err.response?.data || 'Registration failed. Email may already be in use.');
