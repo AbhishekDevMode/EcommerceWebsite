@@ -77,9 +77,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                                .requestMatchers("/api/products", "/api/products/**").permitAll()
+                                .requestMatchers("/api/categories", "/api/categories/**").permitAll()
+                                .requestMatchers("/api/reviews", "/api/reviews/**").permitAll()
                                 .requestMatchers("/api/payments/**").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/ws/**").permitAll()
