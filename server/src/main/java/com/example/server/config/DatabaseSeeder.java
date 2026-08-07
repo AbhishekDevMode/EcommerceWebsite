@@ -1,5 +1,6 @@
 package com.example.server.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.slf4j.Logger;
@@ -101,13 +102,13 @@ public class DatabaseSeeder implements CommandLineRunner {
         p1.setIsActive(true);
         p1.setCategory(electronics);
         p1.setImageUrl("https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80");
-        p1.setImages(Arrays.asList(
+        p1.setImages(new ArrayList<>(Arrays.asList(
                 "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
                 "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=800&q=80",
                 "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
-        ));
-        p1.setColors(Arrays.asList("Black", "Silver", "Midnight Blue"));
-        p1.setSizes(Arrays.asList("Standard"));
+        )));
+        p1.setColors(new ArrayList<>(Arrays.asList("Black", "Silver", "Midnight Blue")));
+        p1.setSizes(new ArrayList<>(Arrays.asList("Standard")));
         saveIfMissing(p1);
 
         // 2. Fitness Smartwatch
@@ -122,12 +123,12 @@ public class DatabaseSeeder implements CommandLineRunner {
         p2.setIsActive(true);
         p2.setCategory(electronics);
         p2.setImageUrl("https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80");
-        p2.setImages(Arrays.asList(
+        p2.setImages(new ArrayList<>(Arrays.asList(
                 "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
                 "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80"
-        ));
-        p2.setColors(Arrays.asList("Space Gray", "Rose Gold", "Silver"));
-        p2.setSizes(Arrays.asList("40mm", "44mm"));
+        )));
+        p2.setColors(new ArrayList<>(Arrays.asList("Space Gray", "Rose Gold", "Silver")));
+        p2.setSizes(new ArrayList<>(Arrays.asList("40mm", "44mm")));
         saveIfMissing(p2);
 
         // 3. Vintage Biker Leather Jacket
@@ -142,12 +143,12 @@ public class DatabaseSeeder implements CommandLineRunner {
         p3.setIsActive(true);
         p3.setCategory(fashion);
         p3.setImageUrl("https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80");
-        p3.setImages(Arrays.asList(
+        p3.setImages(new ArrayList<>(Arrays.asList(
                 "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80",
                 "https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?auto=format&fit=crop&w=800&q=80"
-        ));
-        p3.setColors(Arrays.asList("Obsidian Black", "Chestnut Brown"));
-        p3.setSizes(Arrays.asList("S", "M", "L", "XL"));
+        )));
+        p3.setColors(new ArrayList<>(Arrays.asList("Obsidian Black", "Chestnut Brown")));
+        p3.setSizes(new ArrayList<>(Arrays.asList("S", "M", "L", "XL")));
         saveIfMissing(p3);
 
         // 4. AeroStride Running Sneakers
@@ -162,12 +163,12 @@ public class DatabaseSeeder implements CommandLineRunner {
         p4.setIsActive(true);
         p4.setCategory(sports);
         p4.setImageUrl("https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80");
-        p4.setImages(Arrays.asList(
+        p4.setImages(new ArrayList<>(Arrays.asList(
                 "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80",
                 "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80"
-        ));
-        p4.setColors(Arrays.asList("Crimson Red", "Electric Blue", "Stealth Grey"));
-        p4.setSizes(Arrays.asList("US 8", "US 9", "US 10", "US 11"));
+        )));
+        p4.setColors(new ArrayList<>(Arrays.asList("Crimson Red", "Electric Blue", "Stealth Grey")));
+        p4.setSizes(new ArrayList<>(Arrays.asList("US 8", "US 9", "US 10", "US 11")));
         saveIfMissing(p4);
 
         // 5. ErgoFlex Executive Chair
@@ -182,11 +183,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         p5.setIsActive(true);
         p5.setCategory(homeLiving);
         p5.setImageUrl("https://images.unsplash.com/photo-1580481072645-022f9a6d1270?auto=format&fit=crop&w=800&q=80");
-        p5.setImages(Arrays.asList(
+        p5.setImages(new ArrayList<>(Arrays.asList(
                 "https://images.unsplash.com/photo-1580481072645-022f9a6d1270?auto=format&fit=crop&w=800&q=80"
-        ));
-        p5.setColors(Arrays.asList("Matte Black", "Light Slate"));
-        p5.setSizes(Arrays.asList("Standard"));
+        )));
+        p5.setColors(new ArrayList<>(Arrays.asList("Matte Black", "Light Slate")));
+        p5.setSizes(new ArrayList<>(Arrays.asList("Standard")));
         saveIfMissing(p5);
 
         // 6. Lumina LED Desk Lamp
@@ -201,11 +202,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         p6.setIsActive(true);
         p6.setCategory(homeLiving);
         p6.setImageUrl("https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80");
-        p6.setImages(Arrays.asList(
+        p6.setImages(new ArrayList<>(Arrays.asList(
                 "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80"
-        ));
-        p6.setColors(Arrays.asList("Arctic White", "Charcoal Black"));
-        p6.setSizes(Arrays.asList("Standard"));
+        )));
+        p6.setColors(new ArrayList<>(Arrays.asList("Arctic White", "Charcoal Black")));
+        p6.setSizes(new ArrayList<>(Arrays.asList("Standard")));
         saveIfMissing(p6);
 
         // Seed sample reviews only when the products were created in this run.
