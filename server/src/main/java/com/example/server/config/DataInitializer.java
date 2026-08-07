@@ -5,12 +5,18 @@ import com.example.server.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Component
+/**
+ * Retained only for source compatibility with older deployments.
+ *
+ * DatabaseSeeder is the single source of startup data.  Having two
+ * CommandLineRunner beans made their execution order undefined and could
+ * leave a deployment with products or categories only partially created.
+ */
+@Deprecated
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired

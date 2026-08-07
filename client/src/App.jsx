@@ -15,6 +15,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080
 
 function AppContent() {
     const [categories, setCategories] = useState([]);
+    const [categoryError, setCategoryError] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
 
     // Modal state controllers
@@ -27,8 +28,14 @@ function AppContent() {
 
     useEffect(() => {
         axios.get(`${API_BASE_URL}/api/categories`)
-            .then(res => setCategories(res.data || []))
-            .catch(err => console.error('Error fetching categories:', err));
+            .then(res => {
+                setCategories(res.data || []);
+                setCategoryError(false);
+            })
+            .catch(err => {
+                console.error('Error fetching categories:', err);
+                setCategoryError(true);
+            });
     }, []);
 
     const handleProceedToCheckout = (totalAmount) => {
@@ -50,6 +57,13 @@ function AppContent() {
 
             {/* Main Content Area */}
             <main className="flex-grow-1">
+                {categoryError && (
+                    <div className="container mt-3">
+                        <div className="alert alert-warning mb-0" role="alert">
+                            Categories could not be loaded. Check that <code>VITE_API_BASE_URL</code> points to the running backend, then rebuild the frontend.
+                        </div>
+                    </div>
+                )}
                 {/* Hero Showcase Banner */}
                 {!selectedCategory && (
                     <div className="container mt-4 mb-3">

@@ -87,12 +87,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             return categoryRepository.save(cat);
         });
 
-        if (productRepository.count() > 0) {
-            logger.info("Database already contains {} products. Seeding completed.", productRepository.count());
-            return;
-        }
-
-        logger.info("Seeding initial product catalog into database...");
+        logger.info("Ensuring the initial product catalog exists in the configured database...");
 
         // 1. Ultra Wireless Headphones
         Product p1 = new Product();
@@ -113,7 +108,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         ));
         p1.setColors(Arrays.asList("Black", "Silver", "Midnight Blue"));
         p1.setSizes(Arrays.asList("Standard"));
-        productRepository.save(p1);
+        saveIfMissing(p1);
 
         // 2. Fitness Smartwatch
         Product p2 = new Product();
@@ -133,7 +128,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         ));
         p2.setColors(Arrays.asList("Space Gray", "Rose Gold", "Silver"));
         p2.setSizes(Arrays.asList("40mm", "44mm"));
-        productRepository.save(p2);
+        saveIfMissing(p2);
 
         // 3. Vintage Biker Leather Jacket
         Product p3 = new Product();
@@ -153,7 +148,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         ));
         p3.setColors(Arrays.asList("Obsidian Black", "Chestnut Brown"));
         p3.setSizes(Arrays.asList("S", "M", "L", "XL"));
-        productRepository.save(p3);
+        saveIfMissing(p3);
 
         // 4. AeroStride Running Sneakers
         Product p4 = new Product();
@@ -173,7 +168,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         ));
         p4.setColors(Arrays.asList("Crimson Red", "Electric Blue", "Stealth Grey"));
         p4.setSizes(Arrays.asList("US 8", "US 9", "US 10", "US 11"));
-        productRepository.save(p4);
+        saveIfMissing(p4);
 
         // 5. ErgoFlex Executive Chair
         Product p5 = new Product();
@@ -192,7 +187,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         ));
         p5.setColors(Arrays.asList("Matte Black", "Light Slate"));
         p5.setSizes(Arrays.asList("Standard"));
-        productRepository.save(p5);
+        saveIfMissing(p5);
 
         // 6. Lumina LED Desk Lamp
         Product p6 = new Product();
@@ -211,7 +206,17 @@ public class DatabaseSeeder implements CommandLineRunner {
         ));
         p6.setColors(Arrays.asList("Arctic White", "Charcoal Black"));
         p6.setSizes(Arrays.asList("Standard"));
-        productRepository.save(p6);
+        saveIfMissing(p6);
+
+        // Seed sample reviews only when the products were created in this run.
+        // Existing databases may already contain reviews and must not receive
+        // duplicates on every restart.
+        p1 = findExisting(p1).orElse(p1);
+        p4 = findExisting(p4).orElse(p4);
+        if (reviewRepository.count() > 0) {
+            logger.info("Product catalog is ready ({} products). Existing reviews were preserved.", productRepository.count());
+            return;
+        }
 
         // Seed sample reviews
         Review r1 = new Review();
@@ -235,5 +240,17 @@ public class DatabaseSeeder implements CommandLineRunner {
         productRepository.save(p1);
 
         logger.info("Successfully seeded database with {} initial products.", productRepository.count());
+    }
+
+    private void saveIfMissing(Product product) {
+        if (findExisting(product).isEmpty()) {
+            productRepository.save(product);
+            logger.info("Seeded product: {}", product.getName());
+        }
+    }
+
+    private java.util.Optional<Product> findExisting(Product product) {
+        return productRepository.findBySlug(product.getSlug())
+                .or(() -> productRepository.findFirstByName(product.getName()));
     }
 }
