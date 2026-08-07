@@ -103,7 +103,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=800&q=80",
                 "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
         ));
-        p1.setColors(Arrays.asList("Black", "Silver", "Midnight Blue"));
+        p1.setColors(Arrays.asList("Black", "Silver", "Midnight Black"));
         p1.setSizes(Arrays.asList("Standard"));
         productRepository.save(p1);
 
