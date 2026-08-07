@@ -1,7 +1,7 @@
 package com.example.server.config;
 
-import com.example.server.model.*;
-import com.example.server.repository.*;
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import com.example.server.model.Category;
+import com.example.server.model.Product;
+import com.example.server.model.Review;
+import com.example.server.model.Role;
+import com.example.server.model.User;
+import com.example.server.repository.CategoryRepository;
+import com.example.server.repository.ProductRepository;
+import com.example.server.repository.ReviewRepository;
+import com.example.server.repository.UserRepository;
 
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
@@ -103,7 +111,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=800&q=80",
                 "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
         ));
-        p1.setColors(Arrays.asList("Black", "Silver", "Midnight Black"));
+        p1.setColors(Arrays.asList("Black", "Silver", "Midnight Blue"));
         p1.setSizes(Arrays.asList("Standard"));
         productRepository.save(p1);
 
