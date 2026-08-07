@@ -235,8 +235,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         r2.setTitle("Great buy, super comfortable.");
         r2.setComment("Ear cushions are extremely soft. Highly recommended for long flights and work sessions.");
         reviewRepository.save(r2);
-
-        p1.setReviews(Arrays.asList(r1, r2));
+        if (p1.getReviews() == null) {
+            p1.setReviews(new ArrayList<>());
+        }
+        p1.getReviews().add(r1);
+        p1.getReviews().add(r2);
         p1.updateRating();
         productRepository.save(p1);
 
