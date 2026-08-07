@@ -38,8 +38,7 @@ public class SecurityConfig {
         return new AuthTokenFilter();
     }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
+    private DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
@@ -76,6 +75,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers("/", "/health", "/error").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/products", "/api/products/**").permitAll()
                                 .requestMatchers("/api/categories", "/api/categories/**").permitAll()
