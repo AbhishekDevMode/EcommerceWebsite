@@ -187,7 +187,7 @@ const ProductList = ({
 
                         {/* Price Range Filter */}
                         <div className="mb-4">
-                            <label className="form-label text-muted small fw-bold text-uppercase">Price Range ($)</label>
+                            <label className="form-label text-muted small fw-bold text-uppercase">Price Ranges ($)</label>
                             <div className="row g-2">
                                 <div className="col-6">
                                     <input
