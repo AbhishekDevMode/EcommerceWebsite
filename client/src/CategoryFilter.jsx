@@ -7,7 +7,7 @@ const CategoryFilter = ({ categories, onSelect }) => {
         className="form-control"
         onChange={(e) => onSelect(e.target.value)}
       >
-        <option value="">All Categories</option>
+        <option value="">All Categorie</option>
         {categories.map(category=>(
             <option key={category.id} value={category.id}>{category.name}</option>
             ))}
