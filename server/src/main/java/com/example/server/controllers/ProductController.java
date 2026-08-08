@@ -1,6 +1,7 @@
 package com.example.server.controllers;
 
 import com.example.server.model.Product;
+import com.example.server.dto.ProductResponse;
 import com.example.server.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +20,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
+    public ResponseEntity<List<ProductResponse>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<Page<Product>> getFilteredProducts(
+    public ResponseEntity<Page<ProductResponse>> getFilteredProducts(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Double minPrice,
@@ -38,22 +39,22 @@ public class ProductController {
     }
 
     @GetMapping("/autocomplete")
-    public ResponseEntity<List<Product>> autocomplete(@RequestParam String q) {
+    public ResponseEntity<List<ProductResponse>> autocomplete(@RequestParam String q) {
         return ResponseEntity.ok(productService.autocomplete(q));
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<Product>> getAllProductsByCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<List<ProductResponse>> getAllProductsByCategory(@PathVariable Long categoryId) {
         return ResponseEntity.ok(productService.getProductByCategory(categoryId));
     }
 
     @GetMapping("/{slug}")
-    public ResponseEntity<Product> getProductBySlug(@PathVariable String slug) {
+    public ResponseEntity<ProductResponse> getProductBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(productService.getProductBySlug(slug));
     }
 
     @GetMapping("/{id}/related")
-    public ResponseEntity<List<Product>> getRelatedProducts(@PathVariable Long id) {
+    public ResponseEntity<List<ProductResponse>> getRelatedProducts(@PathVariable Long id) {
         Product product = productService.getProductById(id);
         return ResponseEntity.ok(productService.getRelatedProducts(product.getCategory().getId(), id));
     }

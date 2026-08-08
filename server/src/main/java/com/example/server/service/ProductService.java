@@ -1,11 +1,13 @@
 package com.example.server.service;
 
 import com.example.server.model.Product;
+import com.example.server.dto.ProductResponse;
 import com.example.server.repository.ProductRepository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +20,13 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findByIsActiveTrue();
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getAllProducts() {
+        return productRepository.findByIsActiveTrue().stream().map(ProductResponse::from).toList();
     }
 
-    public Page<Product> getFilteredProducts(
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getFilteredProducts(
             Long categoryId,
             String query,
             Double minPrice,
@@ -78,29 +82,32 @@ public class ProductService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        return productRepository.findAll(spec, pageable);
+        return productRepository.findAll(spec, pageable).map(ProductResponse::from);
     }
 
-    public List<Product> autocomplete(String q) {
+    @Transactional(readOnly = true)
+    public List<ProductResponse> autocomplete(String q) {
         if (q == null || q.trim().isEmpty()) {
             return new ArrayList<>();
         }
-        return productRepository.searchAutocomplete(q.trim(), PageRequest.of(0, 6));
+        return productRepository.searchAutocomplete(q.trim(), PageRequest.of(0, 6)).stream().map(ProductResponse::from).toList();
     }
 
-    public List<Product> getProductByCategory(Long categoryId) {
-        return productRepository.findByCategoryId(categoryId);
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getProductByCategory(Long categoryId) {
+        return productRepository.findByCategoryId(categoryId).stream().map(ProductResponse::from).toList();
     }
 
     public Product getProductById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
     }
 
-    public Product getProductBySlug(String slugOrId) {
+    @Transactional(readOnly = true)
+    public ProductResponse getProductBySlug(String slugOrId) {
         if (slugOrId == null || slugOrId.trim().isEmpty()) {
             throw new RuntimeException("Slug or ID cannot be empty");
         }
-        return productRepository.findBySlug(slugOrId)
+        Product product = productRepository.findBySlug(slugOrId)
                 .orElseGet(() -> {
                     try {
                         Long id = Long.parseLong(slugOrId);
@@ -109,10 +116,13 @@ public class ProductService {
                         throw new RuntimeException("Product not found with slug: " + slugOrId);
                     }
                 });
+        return ProductResponse.from(product);
     }
 
-    public List<Product> getRelatedProducts(Long categoryId, Long productId) {
-        return productRepository.findRelatedProducts(categoryId, productId, PageRequest.of(0, 4));
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getRelatedProducts(Long categoryId, Long productId) {
+        return productRepository.findRelatedProducts(categoryId, productId, PageRequest.of(0, 4))
+                .stream().map(ProductResponse::from).toList();
     }
 
     public Product saveProduct(Product product) {
