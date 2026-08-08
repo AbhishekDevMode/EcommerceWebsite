@@ -86,6 +86,7 @@ public class AuthController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        assert userDetails != null;
         User user = userRepository.findById(userDetails.getId()).orElseThrow(() -> new RuntimeException("User not found"));
         return ResponseEntity.ok(user);
     }

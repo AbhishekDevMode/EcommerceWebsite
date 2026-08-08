@@ -19,12 +19,14 @@ public class CartController {
     @GetMapping
     public ResponseEntity<Cart> getCart(Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        assert userDetails != null;
         return ResponseEntity.ok(cartService.getCart(userDetails.getId()));
     }
 
     @PostMapping("/add")
     public ResponseEntity<Cart> addToCart(@RequestBody AddToCartRequest request, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        assert userDetails != null;
         return ResponseEntity.ok(cartService.addToCart(
                 userDetails.getId(),
                 request.getProductId(),
