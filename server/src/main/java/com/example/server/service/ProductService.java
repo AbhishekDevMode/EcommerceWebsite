@@ -36,7 +36,7 @@ public class ProductService {
             Double minRating,
             String brand,
             String color,
-            String size,
+            String productSize,
             String sortBy,
             int page,
             int size
@@ -94,9 +94,9 @@ public class ProductService {
                 predicates.add(cb.equal(cb.lower(colorJoin), color.toLowerCase()));
             }
 
-            if (size != null && !size.isBlank()) {
+            if (productSize != null && !productSize.isBlank()) {
                 Join<Product, String> sizeJoin = root.join("sizes", JoinType.LEFT);
-                predicates.add(cb.equal(cb.lower(sizeJoin), size.toLowerCase()));
+                predicates.add(cb.equal(cb.lower(sizeJoin), productSize.toLowerCase()));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
