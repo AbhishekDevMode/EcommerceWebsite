@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CartContext } from '../context/CartContext';
 import { WishlistContext } from '../context/WishlistContext';
+import { FALLBACK_PRODUCT_IMAGE, replaceBrokenImage } from '../utils/imageFallback';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
@@ -73,7 +74,7 @@ const ProductList = ({
             if (selectedSize) params.append('productSize', selectedSize);
             params.append('sortBy', sortBy);
             params.append('page', page);
-            params.append('size', searchTerm.trim() ? 100 : 9);
+            params.append('size', searchTerm.trim() ? 100 : 12);
 
             const res = await axios.get(`${API_BASE_URL}/api/products/filter?${params.toString()}`);
             if (res.data && res.data.content) {
@@ -146,7 +147,7 @@ const ProductList = ({
         }
         if (product.imageUrl) return product.imageUrl;
         if (product.images && product.images.length > 0) return product.images[0];
-        return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80";
+        return FALLBACK_PRODUCT_IMAGE;
     };
 
     const formatPrice = (product) => {
@@ -363,6 +364,7 @@ const ProductList = ({
                                                 src={getPrimaryImage(product)}
                                                 className="card-img-top product-img"
                                                 alt={product.title || product.name}
+                                                onError={replaceBrokenImage}
                                                 style={{ height: '220px', objectFit: 'cover' }}
                                             />
                                             {product.category?.name && (
@@ -421,6 +423,7 @@ const ProductList = ({
                                                 src={getPrimaryImage(product)}
                                                 className="img-fluid rounded object-fit-cover"
                                                 alt={product.title || product.name}
+                                                onError={replaceBrokenImage}
                                                 style={{ height: '140px', width: '100%' }}
                                             />
                                         </div>

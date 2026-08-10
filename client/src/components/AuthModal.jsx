@@ -109,7 +109,7 @@ const AuthModal = ({ initialMode = 'login', onClose }) => {
                     {/* Header */}
                     <div className="modal-header border-secondary px-4 py-3">
                         <h5 className="modal-title fw-bold text-gradient">
-                            {mode === 'login' && 'Sign In to ApexMarket'}
+                            {mode === 'login' && 'Sign In to QuicKart'}
                             {mode === 'signup' && 'Create Your Account'}
                             {mode === 'forgot' && 'Forgot Password'}
                             {mode === 'reset' && 'Reset Password'}

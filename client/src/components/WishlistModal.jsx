@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { WishlistContext } from '../context/WishlistContext';
+import { FALLBACK_PRODUCT_IMAGE, replaceBrokenImage } from '../utils/imageFallback';
 
 const WishlistModal = ({ onClose, onProductClick }) => {
     const { wishlist, toggleWishlist } = useContext(WishlistContext);
@@ -25,7 +26,7 @@ const WishlistModal = ({ onClose, onProductClick }) => {
                                 {products.map(product => (
                                     <div className="col-md-6" key={product.id}>
                                         <div className="card card-dark h-100 p-2 d-flex flex-row gap-3 align-items-center">
-                                            <img src={product.imageUrl || product.images?.[0]} alt={product.name} className="rounded" width="82" height="82" style={{ objectFit: 'cover' }} />
+                                            <img src={product.imageUrl || product.images?.[0] || FALLBACK_PRODUCT_IMAGE} onError={replaceBrokenImage} alt={product.name} className="rounded" width="82" height="82" style={{ objectFit: 'cover' }} />
                                             <div className="flex-grow-1 overflow-hidden">
                                                 <button className="btn btn-link p-0 text-start text-light fw-semibold text-decoration-none text-truncate w-100" onClick={() => onProductClick(product)}>{product.name}</button>
                                                 <div className="small text-muted">{product.brand}</div>

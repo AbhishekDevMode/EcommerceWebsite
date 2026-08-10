@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
+import { replaceBrokenImage } from '../utils/imageFallback';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -183,6 +184,7 @@ const Navbar = ({
                     <img
                       src={p.imageUrl}
                       alt={p.name}
+                      onError={replaceBrokenImage}
                       className="rounded object-fit-cover"
                       width="45"
                       height="45"

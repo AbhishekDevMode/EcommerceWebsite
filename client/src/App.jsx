@@ -188,10 +188,10 @@ function AppContent() {
             <footer className={`${theme === 'dark' ? 'bg-dark border-secondary' : 'bg-white border-light'} border-top mt-5 py-4 text-muted small`}>
                 <div className="container text-center">
                     <div className="d-flex justify-content-center align-items-center gap-2 fw-bold text-gradient fs-5 mb-2">
-                        <i className="bi bi-bag-heart-fill text-primary"></i> ApexMarket
+                        <i className="bi bi-bag-heart-fill text-primary"></i> QuicKart
                     </div>
                     <p className="mb-2">Empowering seamless online shopping with high-grade security, instant checkout, and real-time inventory management.</p>
-                    <div className="text-secondary">&copy; {new Date().getFullYear()} ApexMarket E-Commerce Inc. All Rights Reserved.</div>
+                    <div className="text-secondary">&copy; {new Date().getFullYear()} QuicKart E-Commerce Inc. All Rights Reserved.</div>
                 </div>
             </footer>
 

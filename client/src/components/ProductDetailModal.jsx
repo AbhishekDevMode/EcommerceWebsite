@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
+import { FALLBACK_PRODUCT_IMAGE, replaceBrokenImage } from '../utils/imageFallback';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
@@ -130,7 +131,8 @@ const ProductDetailModal = ({ product, onClose, onProductClick, onOpenAuth }) =>
                                     style={{ height: '380px', backgroundColor: '#111' }}
                                 >
                                     <img
-                                        src={selectedImage || product.imageUrl}
+                                        src={selectedImage || product.imageUrl || FALLBACK_PRODUCT_IMAGE}
+                                        onError={replaceBrokenImage}
                                         alt={product.name}
                                         className="w-100 h-100 object-fit-contain"
                                         style={{
@@ -152,6 +154,7 @@ const ProductDetailModal = ({ product, onClose, onProductClick, onOpenAuth }) =>
                                                 key={idx}
                                                 src={img}
                                                 alt={`Thumbnail ${idx}`}
+                                                onError={replaceBrokenImage}
                                                 className={`rounded cursor-pointer border ${selectedImage === img ? 'border-primary border-2' : 'border-secondary opacity-75'}`}
                                                 width="70"
                                                 height="70"
@@ -366,7 +369,7 @@ const ProductDetailModal = ({ product, onClose, onProductClick, onOpenAuth }) =>
                                     {relatedProducts.map(rel => (
                                         <div key={rel.id} className="col-md-3 col-6">
                                             <div className="card card-product p-2 cursor-pointer h-100" onClick={() => onProductClick(rel)}>
-                                                <img src={rel.imageUrl} alt={rel.name} className="card-img-top rounded" style={{ height: '120px', objectFit: 'cover' }} />
+                                                <img src={rel.imageUrl || FALLBACK_PRODUCT_IMAGE} onError={replaceBrokenImage} alt={rel.name} className="card-img-top rounded" style={{ height: '120px', objectFit: 'cover' }} />
                                                 <div className="card-body p-2">
                                                     <div className="fw-semibold text-light small text-truncate">{rel.name}</div>
                                                     <div className="fw-bold text-success mt-1">${rel.price?.toFixed(2)}</div>

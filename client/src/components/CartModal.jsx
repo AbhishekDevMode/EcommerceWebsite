@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { CartContext } from '../context/CartContext';
+import { FALLBACK_PRODUCT_IMAGE, replaceBrokenImage } from '../utils/imageFallback';
 import { AuthContext } from '../context/AuthContext';
 
 const CartModal = ({ onClose, onProceedToCheckout, onOpenAuth }) => {
@@ -81,7 +82,8 @@ const CartModal = ({ onClose, onProceedToCheckout, onOpenAuth }) => {
                                                 <div key={item.id} className="card card-dark p-3 border-secondary">
                                                     <div className="d-flex gap-3 align-items-center">
                                                         <img
-                                                            src={item.product?.imageUrl}
+                                                            src={item.product?.imageUrl || FALLBACK_PRODUCT_IMAGE}
+                                                            onError={replaceBrokenImage}
                                                             alt={item.product?.name}
                                                             className="rounded object-fit-cover"
                                                             width="70"
@@ -129,7 +131,7 @@ const CartModal = ({ onClose, onProceedToCheckout, onOpenAuth }) => {
                                                 {savedItems.map(item => (
                                                     <div key={item.id} className="card card-dark p-2 border-secondary d-flex flex-row align-items-center justify-content-between">
                                                         <div className="d-flex align-items-center gap-2">
-                                                            <img src={item.product?.imageUrl} alt={item.product?.name} className="rounded" width="40" height="40" style={{ objectFit: 'cover' }} />
+                                                            <img src={item.product?.imageUrl || FALLBACK_PRODUCT_IMAGE} onError={replaceBrokenImage} alt={item.product?.name} className="rounded" width="40" height="40" style={{ objectFit: 'cover' }} />
                                                             <div>
                                                                 <div className="small text-light fw-semibold text-truncate" style={{ maxWidth: '180px' }}>{item.product?.name}</div>
                                                                 <div className="small text-success">${item.product?.price?.toFixed(2)}</div>
