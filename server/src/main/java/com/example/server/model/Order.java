@@ -28,7 +28,7 @@ public class Order {
     private Double shippingFee = 0.0;
     private Double totalAmount = 0.0;
 
-    private String paymentMethod; // Stripe, PayPal, Razorpay
+    private String paymentMethod;
     private String paymentStatus = "PAID";
 
     @Column(columnDefinition = "TEXT")

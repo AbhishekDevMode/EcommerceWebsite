@@ -32,7 +32,9 @@ public class WishlistService {
     public Wishlist addProduct(Long userId, Long productId) {
         Wishlist wishlist = getWishlist(userId);
         Product product = productRepository.findById(productId).orElseThrow();
-        wishlist.getProducts().add(product);
+        if (!wishlist.getProducts().contains(product)) {
+            wishlist.getProducts().add(product);
+        }
         return wishlistRepository.save(wishlist);
     }
 

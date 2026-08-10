@@ -14,6 +14,8 @@ const Navbar = ({
   onOpenProfile,
   onOpenWishlist,
   onProductClick,
+  theme,
+  onToggleTheme,
   categories = [],
 }) => {
   const { user, logout } = useContext(AuthContext);
@@ -84,7 +86,7 @@ const Navbar = ({
           }}
         >
           <i className="bi bi-bag-heart-fill fs-3 text-primary"></i>
-          <span>QuicKKart</span>
+          <span>QuicKart</span>
         </a>
 
         {/* Navbar Toggler */}
@@ -207,6 +209,14 @@ const Navbar = ({
 
           {/* Right Action Icons: Cart & Profile */}
           <div className="d-flex align-items-center gap-3 ms-auto">
+            <button
+              className="btn btn-outline-light d-flex align-items-center justify-content-center rounded-circle"
+              style={{ width: '42px', height: '42px' }}
+              title={theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
+              onClick={onToggleTheme}
+            >
+              <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
+            </button>
             <button
               className="btn btn-outline-light position-relative d-flex align-items-center justify-content-center rounded-circle"
               style={{ width: '42px', height: '42px' }}

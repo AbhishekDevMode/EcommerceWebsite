@@ -15,6 +15,13 @@ import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
+const heroSlides = [
+    { badge: 'Limited-time deal', title: 'Special Offers,', accent: 'Special Prices', text: 'Save big on hand-picked gadgets, fashion, and home essentials. New deals arrive every day.', action: 'Explore offers', search: 'sale', theme: 'offer' },
+    { badge: 'Festive collection', title: 'Celebrate the', accent: 'Festive Season', text: 'Discover thoughtful gifts, bright home décor, and style for every celebration.', action: 'Shop festive picks', search: 'gift', theme: 'festive' },
+    { badge: 'QuicKart Big Days', title: 'Big Deals.', accent: 'Bigger Smiles.', text: 'Our biggest-value event is here with extra savings across top brands and categories.', action: 'View big deals', search: 'electronics', theme: 'billions' },
+    { badge: 'Fresh arrivals', title: 'Upgrade Your', accent: 'Everyday', text: 'Trending essentials, trusted brands, and delivery that keeps up with your life.', action: 'See new arrivals', search: 'new', theme: 'arrival' },
+];
+
 function AppContent() {
     const [categories, setCategories] = useState([]);
     const [categoryError, setCategoryError] = useState(false);
@@ -29,6 +36,19 @@ function AppContent() {
     const [authModalMode, setAuthModalMode] = useState(null); // 'login' | 'signup' | null
     const [userProfileTab, setUserProfileTab] = useState(null); // 'info' | 'orders' | 'addresses' | null
     const [showWishlistModal, setShowWishlistModal] = useState(false);
+    const [theme, setTheme] = useState(() => localStorage.getItem('quickkart-theme') || 'dark');
+    const [activeSlide, setActiveSlide] = useState(0);
+
+    useEffect(() => {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem('quickkart-theme', theme);
+    }, [theme]);
+
+    useEffect(() => {
+        if (selectedCategory || searchTerm) return undefined;
+        const timer = window.setInterval(() => setActiveSlide(current => (current + 1) % heroSlides.length), 5000);
+        return () => window.clearInterval(timer);
+    }, [selectedCategory, searchTerm]);
 
     useEffect(() => {
         axios.get(`${API_BASE_URL}/api/categories`)
@@ -48,7 +68,7 @@ function AppContent() {
     };
 
     return (
-        <div className="d-flex flex-column min-vh-100 bg-dark text-light">
+        <div className={`app-shell theme-${theme} d-flex flex-column min-vh-100 ${theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
             {/* Top Navigation */}
             <Navbar
                 categories={categories}
@@ -67,6 +87,8 @@ function AppContent() {
                 onOpenProfile={(tab) => setUserProfileTab(tab)}
                 onOpenWishlist={() => setShowWishlistModal(true)}
                 onProductClick={(product) => setActiveProduct(product)}
+                theme={theme}
+                onToggleTheme={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
             />
 
             {/* Main Content Area */}
@@ -81,27 +103,29 @@ function AppContent() {
                 {/* Hero Showcase Banner */}
                 {!selectedCategory && !searchTerm && (
                     <div className="container mt-4 mb-3">
-                        <div className="hero-banner p-4 p-md-5 text-center text-md-start d-flex flex-column justify-content-center shadow-lg">
-                            <div className="row align-items-center">
-                                <div className="col-md-8">
-                                    <span className="badge bg-primary px-3 py-2 text-uppercase mb-3">Summer Flash Sale</span>
-                                    <h1 className="display-4 fw-bold text-light mb-3">
-                                        Next-Gen Tech & <span className="text-gradient">Premium Fashion</span>
-                                    </h1>
-                                    <p className="lead text-muted mb-4" style={{ maxWidth: '600px' }}>
-                                        Discover top-tier acoustics, smart wearables, handcrafted leather, and high-performance athletic footwear with free express delivery.
-                                    </p>
-                                    <div className="d-flex flex-wrap gap-3">
-                                        <a href="#catalog" className="btn btn-gradient-primary rounded-pill px-4 py-2 fw-semibold">
-                                            Explore Collection <i className="bi bi-arrow-down-short ms-1"></i>
-                                        </a>
-                                        <button className="btn btn-outline-light rounded-pill px-4 py-2 fw-semibold" onClick={() => setSelectedCategory(categories[0]?.id)}>
-                                            Shop Electronics
-                                        </button>
-                                    </div>
-                                </div>
+                        <section className="hero-carousel shadow-lg" aria-label="Featured offers">
+                            <div className="hero-carousel-track" style={{ transform: `translateX(-${activeSlide * 100}%)` }}>
+                                {heroSlides.map((slide) => (
+                                    <article className={`hero-slide hero-slide-${slide.theme}`} key={slide.theme}>
+                                        <div className="hero-content p-4 p-md-5 text-center text-md-start">
+                                            <span className="badge hero-badge px-3 py-2 text-uppercase mb-3">{slide.badge}</span>
+                                            <h1 className="display-4 fw-bold mb-3">{slide.title} <span>{slide.accent}</span></h1>
+                                            <p className="lead mb-4" style={{ maxWidth: '600px' }}>{slide.text}</p>
+                                            <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
+                                                <button className="btn btn-light rounded-pill px-4 py-2 fw-semibold" onClick={() => {
+                                                    setSearchTerm(slide.search);
+                                                    window.history.pushState({}, '', `${window.location.pathname}?search=${encodeURIComponent(slide.search)}`);
+                                                }}>{slide.action} <i className="bi bi-arrow-right ms-1"></i></button>
+                                                <a href="#catalog" className="btn btn-outline-light rounded-pill px-4 py-2 fw-semibold">Browse catalogue</a>
+                                            </div>
+                                        </div>
+                                    </article>
+                                ))}
                             </div>
-                        </div>
+                            <button className="hero-arrow hero-arrow-prev" aria-label="Previous offer" onClick={() => setActiveSlide(current => (current - 1 + heroSlides.length) % heroSlides.length)}><i className="bi bi-chevron-left"></i></button>
+                            <button className="hero-arrow hero-arrow-next" aria-label="Next offer" onClick={() => setActiveSlide(current => (current + 1) % heroSlides.length)}><i className="bi bi-chevron-right"></i></button>
+                            <div className="hero-dots">{heroSlides.map((slide, index) => <button key={slide.theme} className={index === activeSlide ? 'active' : ''} aria-label={`Show ${slide.badge}`} onClick={() => setActiveSlide(index)} />)}</div>
+                        </section>
                     </div>
                 )}
 
@@ -161,7 +185,7 @@ function AppContent() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-dark border-top border-secondary mt-5 py-4 text-muted small">
+            <footer className={`${theme === 'dark' ? 'bg-dark border-secondary' : 'bg-white border-light'} border-top mt-5 py-4 text-muted small`}>
                 <div className="container text-center">
                     <div className="d-flex justify-content-center align-items-center gap-2 fw-bold text-gradient fs-5 mb-2">
                         <i className="bi bi-bag-heart-fill text-primary"></i> ApexMarket

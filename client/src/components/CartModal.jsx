@@ -15,8 +15,8 @@ const CartModal = ({ onClose, onProceedToCheckout, onOpenAuth }) => {
         moveToCart,
         removeFromCart
     } = useContext(CartContext);
-    const { user } = useContext(AuthContext);
 
+    const { user } = useContext(AuthContext);
     const [promoCode, setPromoCode] = useState('');
     const [discount, setDiscount] = useState(0);
     const [promoApplied, setPromoApplied] = useState(false);

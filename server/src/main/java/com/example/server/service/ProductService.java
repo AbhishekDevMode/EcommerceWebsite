@@ -4,6 +4,8 @@ import com.example.server.model.Product;
 import com.example.server.dto.ProductResponse;
 import com.example.server.repository.ProductRepository;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Join;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,9 @@ public class ProductService {
             Double minPrice,
             Double maxPrice,
             Double minRating,
+            String brand,
+            String color,
+            String size,
             String sortBy,
             int page,
             int size
@@ -51,6 +56,7 @@ public class ProductService {
 
         Specification<Product> spec = (root, queryObj, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            queryObj.distinct(true);
 
             // Always filter active products by default
             predicates.add(cb.equal(root.get("isActive"), true));
@@ -77,6 +83,20 @@ public class ProductService {
 
             if (minRating != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("averageRating"), minRating));
+            }
+
+            if (brand != null && !brand.isBlank()) {
+                predicates.add(cb.equal(cb.lower(root.get("brand")), brand.toLowerCase()));
+            }
+
+            if (color != null && !color.isBlank()) {
+                Join<Product, String> colorJoin = root.join("colors", JoinType.LEFT);
+                predicates.add(cb.equal(cb.lower(colorJoin), color.toLowerCase()));
+            }
+
+            if (size != null && !size.isBlank()) {
+                Join<Product, String> sizeJoin = root.join("sizes", JoinType.LEFT);
+                predicates.add(cb.equal(cb.lower(sizeJoin), size.toLowerCase()));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

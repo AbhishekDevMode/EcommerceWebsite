@@ -31,11 +31,14 @@ public class ProductController {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String productSize,
             @RequestParam(defaultValue = "newest") String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size
     ) {
-        return ResponseEntity.ok(productService.getFilteredProducts(categoryId, search, minPrice, maxPrice, minRating, sortBy, page, size));
+        return ResponseEntity.ok(productService.getFilteredProducts(categoryId, search, minPrice, maxPrice, minRating, brand, color, productSize, sortBy, page, size));
     }
 
     @GetMapping("/autocomplete")
