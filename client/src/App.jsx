@@ -7,8 +7,10 @@ import CartModal from './components/CartModal';
 import CheckoutModal from './components/CheckoutModal';
 import AuthModal from './components/AuthModal';
 import UserProfileModal from './components/UserProfileModal';
+import WishlistModal from './components/WishlistModal';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -17,6 +19,7 @@ function AppContent() {
     const [categories, setCategories] = useState([]);
     const [categoryError, setCategoryError] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get('search') || '');
 
     // Modal state controllers
     const [activeProduct, setActiveProduct] = useState(null);
@@ -25,6 +28,7 @@ function AppContent() {
     const [checkoutTotal, setCheckoutTotal] = useState(0);
     const [authModalMode, setAuthModalMode] = useState(null); // 'login' | 'signup' | null
     const [userProfileTab, setUserProfileTab] = useState(null); // 'info' | 'orders' | 'addresses' | null
+    const [showWishlistModal, setShowWishlistModal] = useState(false);
 
     useEffect(() => {
         axios.get(`${API_BASE_URL}/api/categories`)
@@ -48,10 +52,20 @@ function AppContent() {
             {/* Top Navigation */}
             <Navbar
                 categories={categories}
-                onSelectCategory={(id) => setSelectedCategory(id)}
+                onSelectCategory={(id) => {
+                    setSelectedCategory(id);
+                    setSearchTerm('');
+                    window.history.pushState({}, '', window.location.pathname);
+                }}
+                onSearch={(query) => {
+                    setSelectedCategory(null);
+                    setSearchTerm(query);
+                    window.history.pushState({}, '', `${window.location.pathname}?search=${encodeURIComponent(query)}`);
+                }}
                 onOpenAuth={(mode) => setAuthModalMode(mode)}
                 onOpenCart={() => setShowCartModal(true)}
                 onOpenProfile={(tab) => setUserProfileTab(tab)}
+                onOpenWishlist={() => setShowWishlistModal(true)}
                 onProductClick={(product) => setActiveProduct(product)}
             />
 
@@ -65,7 +79,7 @@ function AppContent() {
                     </div>
                 )}
                 {/* Hero Showcase Banner */}
-                {!selectedCategory && (
+                {!selectedCategory && !searchTerm && (
                     <div className="container mt-4 mb-3">
                         <div className="hero-banner p-4 p-md-5 text-center text-md-start d-flex flex-column justify-content-center shadow-lg">
                             <div className="row align-items-center">
@@ -137,6 +151,7 @@ function AppContent() {
                 <div id="catalog">
                     <ProductList
                         selectedCategory={selectedCategory}
+                        searchTerm={searchTerm}
                         onSelectCategory={(id) => setSelectedCategory(id)}
                         categories={categories}
                         onProductClick={(product) => setActiveProduct(product)}
@@ -194,6 +209,16 @@ function AppContent() {
                     onClose={() => setUserProfileTab(null)}
                 />
             )}
+
+            {showWishlistModal && (
+                <WishlistModal
+                    onClose={() => setShowWishlistModal(false)}
+                    onProductClick={(product) => {
+                        setActiveProduct(product);
+                        setShowWishlistModal(false);
+                    }}
+                />
+            )}
         </div>
     );
 }
@@ -201,9 +226,11 @@ function AppContent() {
 export default function App() {
     return (
         <AuthProvider>
-            <CartProvider>
-                <AppContent />
-            </CartProvider>
+            <WishlistProvider>
+                <CartProvider>
+                    <AppContent />
+                </CartProvider>
+            </WishlistProvider>
         </AuthProvider>
     );
 }

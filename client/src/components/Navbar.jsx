@@ -8,9 +8,11 @@ const API_BASE_URL =
 
 const Navbar = ({
   onSelectCategory,
+  onSearch,
   onOpenAuth,
   onOpenCart,
   onOpenProfile,
+  onOpenWishlist,
   onProductClick,
   categories = [],
 }) => {
@@ -59,6 +61,14 @@ const Navbar = ({
     setShowSuggestions(false);
   };
 
+  const submitSearch = (event) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (!query) return;
+    onSearch(query);
+    setShowSuggestions(false);
+  };
+
   const cartCount = activeItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -74,7 +84,7 @@ const Navbar = ({
           }}
         >
           <i className="bi bi-bag-heart-fill fs-3 text-primary"></i>
-          <span>ApexMarket</span>
+          <span>QuicKKart</span>
         </a>
 
         {/* Navbar Toggler */}
@@ -123,9 +133,10 @@ const Navbar = ({
           </div>
 
           {/* Autocomplete Search Bar */}
-          <div
+          <form
             className="flex-grow-1 position-relative me-lg-3 my-2 my-lg-0"
             ref={searchRef}
+            onSubmit={submitSearch}
           >
             <div className="input-group">
               <span className="input-group-text bg-dark-subtle border-secondary text-light">
@@ -150,6 +161,9 @@ const Navbar = ({
                   <i className="bi bi-x-lg"></i>
                 </button>
               )}
+              <button className="btn btn-primary" type="submit" title="Search">
+                <i className="bi bi-search"></i>
+              </button>
             </div>
 
             {/* Autocomplete Suggestions Menu */}
@@ -189,10 +203,18 @@ const Navbar = ({
                 ))}
               </div>
             )}
-          </div>
+          </form>
 
           {/* Right Action Icons: Cart & Profile */}
           <div className="d-flex align-items-center gap-3 ms-auto">
+            <button
+              className="btn btn-outline-light position-relative d-flex align-items-center justify-content-center rounded-circle"
+              style={{ width: '42px', height: '42px' }}
+              title="Wishlist"
+              onClick={() => user ? onOpenWishlist() : onOpenAuth('login')}
+            >
+              <i className="bi bi-heart fs-5"></i>
+            </button>
             {/* Cart Button */}
             <button
               className="btn btn-outline-light position-relative d-flex align-items-center gap-2 px-3 py-2 rounded-pill"

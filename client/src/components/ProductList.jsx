@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CartContext } from '../context/CartContext';
+import { WishlistContext } from '../context/WishlistContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
@@ -31,12 +32,14 @@ const ProductSkeleton = () => (
 
 const ProductList = ({
     selectedCategory,
+    searchTerm = '',
     onSelectCategory,
     categories = [],
     onProductClick,
     onOpenAuth
 }) => {
     const { addToCart } = useContext(CartContext);
+    const { toggleWishlist, isWishlisted } = useContext(WishlistContext);
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -47,6 +50,9 @@ const ProductList = ({
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
     const [minRating, setMinRating] = useState('');
+    const [selectedBrand, setSelectedBrand] = useState('');
+    const [selectedColor, setSelectedColor] = useState('');
+    const [selectedSize, setSelectedSize] = useState('');
     const [sortBy, setSortBy] = useState('newest');
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
@@ -58,12 +64,16 @@ const ProductList = ({
         try {
             const params = new URLSearchParams();
             if (selectedCategory) params.append('categoryId', selectedCategory);
+            if (searchTerm.trim()) params.append('search', searchTerm.trim());
             if (minPrice) params.append('minPrice', minPrice);
             if (maxPrice) params.append('maxPrice', maxPrice);
             if (minRating) params.append('minRating', minRating);
+            if (selectedBrand) params.append('brand', selectedBrand);
+            if (selectedColor) params.append('color', selectedColor);
+            if (selectedSize) params.append('productSize', selectedSize);
             params.append('sortBy', sortBy);
             params.append('page', page);
-            params.append('size', 9);
+            params.append('size', searchTerm.trim() ? 100 : 9);
 
             const res = await axios.get(`${API_BASE_URL}/api/products/filter?${params.toString()}`);
             if (res.data && res.data.content) {
@@ -93,11 +103,26 @@ const ProductList = ({
 
     useEffect(() => {
         setPage(0);
-    }, [selectedCategory, minPrice, maxPrice, minRating, sortBy]);
+    }, [selectedCategory, searchTerm, minPrice, maxPrice, minRating, selectedBrand, selectedColor, selectedSize, sortBy]);
 
     useEffect(() => {
         fetchFilteredProducts();
-    }, [selectedCategory, minPrice, maxPrice, minRating, sortBy, page]);
+    }, [selectedCategory, searchTerm, minPrice, maxPrice, minRating, selectedBrand, selectedColor, selectedSize, sortBy, page]);
+
+    const showFilters = Boolean(searchTerm.trim());
+    const brands = [...new Set(products.map(product => product.brand).filter(Boolean))].sort();
+    const colors = [...new Set(products.flatMap(product => product.colors || []))].sort();
+    const sizes = [...new Set(products.flatMap(product => product.sizes || []))].sort();
+
+    const clearFilters = () => {
+        if (onSelectCategory) onSelectCategory(null);
+        setMinPrice('');
+        setMaxPrice('');
+        setMinRating('');
+        setSelectedBrand('');
+        setSelectedColor('');
+        setSelectedSize('');
+    };
 
     const handleQuickAddToCart = async (e, product) => {
         e.stopPropagation();
@@ -105,6 +130,12 @@ const ProductList = ({
         if (res?.requireAuth && onOpenAuth) {
             onOpenAuth('login');
         }
+    };
+
+    const handleWishlist = async (e, product) => {
+        e.stopPropagation();
+        const result = await toggleWishlist(product.id);
+        if (result?.requireAuth && onOpenAuth) onOpenAuth('login');
     };
 
     const getPrimaryImage = (product) => {
@@ -146,21 +177,40 @@ const ProductList = ({
     return (
         <div className="container my-4">
             <div className="row g-4">
-                {/* Sidebar Filter Panel */}
-                <div className="col-lg-3 col-md-4">
+                {/* Search-only filter panel */}
+                {showFilters && <div className="col-lg-3 col-md-4">
                     <div className="card card-dark p-3 sticky-top" style={{ top: '80px' }}>
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <h5 className="fw-bold mb-0 text-gradient"><i className="bi bi-funnel me-2"></i>Filters</h5>
-                            {(selectedCategory || minPrice || maxPrice || minRating) && (
-                                <button className="btn btn-sm btn-link text-danger text-decoration-none p-0" onClick={() => {
-                                    if (onSelectCategory) onSelectCategory(null);
-                                    setMinPrice('');
-                                    setMaxPrice('');
-                                    setMinRating('');
-                                }}>
+                            {(selectedCategory || minPrice || maxPrice || minRating || selectedBrand || selectedColor || selectedSize) && (
+                                <button className="btn btn-sm btn-link text-danger text-decoration-none p-0" onClick={clearFilters}>
                                     Clear All
                                 </button>
                             )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="form-label text-muted small fw-bold text-uppercase">Brand</label>
+                            <select className="form-select form-select-sm bg-dark text-light border-secondary" value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)}>
+                                <option value="">All brands</option>
+                                {brands.map(brand => <option key={brand} value={brand}>{brand}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="form-label text-muted small fw-bold text-uppercase">Color</label>
+                            <select className="form-select form-select-sm bg-dark text-light border-secondary" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}>
+                                <option value="">All colors</option>
+                                {colors.map(color => <option key={color} value={color}>{color}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="form-label text-muted small fw-bold text-uppercase">Size</label>
+                            <select className="form-select form-select-sm bg-dark text-light border-secondary" value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}>
+                                <option value="">All sizes</option>
+                                {sizes.map(size => <option key={size} value={size}>{size}</option>)}
+                            </select>
                         </div>
 
                         {/* Category Filter */}
@@ -231,13 +281,14 @@ const ProductList = ({
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>}
 
                 {/* Main Product Catalog Display */}
-                <div className="col-lg-9 col-md-8">
+                <div className={showFilters ? 'col-lg-9 col-md-8' : 'col-12'}>
                     {/* Top Control Bar */}
                     <div className="card card-dark p-3 mb-4 d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
                         <div className="text-muted">
+                            {showFilters && <div className="fw-semibold text-light mb-1">Search results for “{searchTerm}”</div>}
                             Showing <span className="fw-bold text-light">{products.length}</span> of <span className="fw-bold text-light">{totalElements || products.length}</span> items
                         </div>
 
@@ -300,12 +351,7 @@ const ProductList = ({
                             <i className="bi bi-search-heart text-muted fs-1 mb-3"></i>
                             <h4 className="fw-bold text-light">No Products Found</h4>
                             <p className="text-muted">Try adjusting your filters or search terms.</p>
-                            <button className="btn btn-outline-primary btn-sm mx-auto" onClick={() => {
-                                if (onSelectCategory) onSelectCategory(null);
-                                setMinPrice('');
-                                setMaxPrice('');
-                                setMinRating('');
-                            }}>Reset Filters</button>
+                            <button className="btn btn-outline-primary btn-sm mx-auto" onClick={clearFilters}>Reset Filters</button>
                         </div>
                     ) : viewMode === 'grid' ? (
                         <div className="row g-4">
@@ -329,6 +375,13 @@ const ProductList = ({
                                                     Only {product.stock} left
                                                 </span>
                                             )}
+                                            <button
+                                                className={`btn btn-sm rounded-circle position-absolute bottom-0 end-0 m-2 ${isWishlisted(product.id) ? 'btn-danger' : 'btn-dark'}`}
+                                                title={isWishlisted(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                                                onClick={(e) => handleWishlist(e, product)}
+                                            >
+                                                <i className={`bi ${isWishlisted(product.id) ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+                                            </button>
                                         </div>
 
                                         <div className="card-body d-flex flex-column">
@@ -385,6 +438,9 @@ const ProductList = ({
                                         </div>
                                         <div className="col-md-3 col-12 d-flex flex-column justify-content-center align-items-md-end">
                                             <div className="fs-4 fw-bold text-success mb-2">${formatPrice(product)}</div>
+                                            <button className={`btn btn-sm mb-2 w-100 ${isWishlisted(product.id) ? 'btn-danger' : 'btn-outline-danger'}`} onClick={(e) => handleWishlist(e, product)}>
+                                                <i className={`bi ${isWishlisted(product.id) ? 'bi-heart-fill' : 'bi-heart'} me-1`}></i>{isWishlisted(product.id) ? 'Saved' : 'Wishlist'}
+                                            </button>
                                             <button
                                                 className="btn btn-primary btn-sm w-100 rounded-pill"
                                                 onClick={(e) => handleQuickAddToCart(e, product)}
