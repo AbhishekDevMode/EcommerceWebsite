@@ -35,7 +35,6 @@ const ProductDetailModal = ({ product, onClose, onProductClick, onOpenAuth }) =>
         axios.get(`${API_BASE_URL}/api/products/${product.id}/related`)
             .then(res => setRelatedProducts(res.data || []))
             .catch(err => console.error('Error fetching related products:', err));
-
         // Fetch reviews
         axios.get(`${API_BASE_URL}/api/reviews/product/${product.id}`)
             .then(res => setReviews(res.data || []))

@@ -3,6 +3,7 @@ package com.example.server.config;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
+    public void run(String @NonNull ... args) throws Exception {
         // Seed default Users if not present
         User testUser = userRepository.findByEmail("user@example.com").orElseGet(() -> {
             User u = new User();
@@ -209,9 +210,28 @@ public class DatabaseSeeder implements CommandLineRunner {
         p6.setSizes(new ArrayList<>(Arrays.asList("Standard")));
         saveIfMissing(p6);
 
+        Product p7 = new Product();
+        p7.setName("Iphone 15");
+        p7.setSlug("Iphone-15");
+        p7.setDescription("");
+        p7.setPrice(59.99);
+        p7.setBasePriceCents(5999);
+        p7.setBrand("Lumina");
+        p7.setStock(40);
+        p7.setIsActive(true);
+        p7.setCategory(homeLiving);
+        p7.setImageUrl("https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80");
+        p7.setImages(new ArrayList<>(Arrays.asList(
+                "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80"
+        )));
+        p7.setColors(new ArrayList<>(Arrays.asList("Arctic White", "Charcoal Black")));
+        p7.setSizes(new ArrayList<>(Arrays.asList("Standard")));
+        saveIfMissing(p7);
+
         // Seed sample reviews only when the products were created in this run.
         // Existing databases may already contain reviews and must not receive
         // duplicates on every restart.
+
         p1 = findExisting(p1).orElse(p1);
         p4 = findExisting(p4).orElse(p4);
         if (reviewRepository.count() > 0) {
