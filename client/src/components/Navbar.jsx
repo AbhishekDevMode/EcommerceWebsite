@@ -136,6 +136,7 @@ const Navbar = ({
           </div>
 
           {/* Autocomplete Search Bar */}
+          
           <form
             className="flex-grow-1 position-relative me-lg-3 my-2 my-lg-0"
             ref={searchRef}
